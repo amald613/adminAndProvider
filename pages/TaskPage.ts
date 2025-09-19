@@ -95,7 +95,7 @@ export default class TaskPage {
 
     // Sorting
     this.sortButton = page.getByRole("button", { name: "Task #" });
-    this.taskColumn = page.locator("tbody td:nth-child(2)");
+    this.taskColumn = page.locator("tbody td:nth-child(2)");  
   }
 
   async login(email: string, password: string) {

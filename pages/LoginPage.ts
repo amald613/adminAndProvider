@@ -12,11 +12,13 @@ export class LoginPage {
   readonly scribeDashboardText: Locator;
   readonly forgotPassword: Locator;
   readonly forgotPasswordMessage: Locator;
+  readonly passwordEyeButton: Locator
 
   constructor(page: Page) {
     this.page = page;
     this.emailInput = page.getByRole('textbox', { name: 'Email' });
     this.passwordInput = page.locator('input[name="password"]');
+    this.passwordEyeButton = page.locator('[id="«Riqhtrlb»-form-item"]').getByRole('button');
     this.submitButton = page.getByRole('button', { name: 'Submit' });
     // Field-specific error messages
     this.emailError = page.getByText('Invalid email format');
@@ -49,6 +51,11 @@ export class LoginPage {
 
   async submit() {
     await this.submitButton.click();
+  }
+  async clickPasswordEyeButton(password: string){
+    await this.passwordInput.fill(password);
+    await this.passwordEyeButton.click();
+    expect(this.passwordInput).toHaveValue(password);
   }
 
 

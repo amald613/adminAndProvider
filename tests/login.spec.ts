@@ -79,4 +79,12 @@ test.describe("Login Tests", () => {
   await loginPage.ForgotPassword("testprovid@gmail.com");
 
   })
+  test('TC015 - Click Password Eye Button', async ({page})=>{
+  const loginPage = new LoginPage(page);
+  await loginPage.goto();
+  await loginPage.clickPasswordEyeButton("12345678");
+  console.log(`Input password value is ${await loginPage.passwordInput.inputValue()}`);
+  const inputType = await loginPage.passwordInput.getAttribute("type");
+  console.log(`Password input type is: ${inputType}`);
+  })
 });
