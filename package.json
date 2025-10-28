@@ -1,18 +1,30 @@
 {
-  "name": "ezyscribe-playwright",
+  "name": "admin-dashboard-tests",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "test": "playwright test",
+    "test:staging": "NODE_ENV=staging playwright test",
+    "test:production": "NODE_ENV=production playwright test",
+    "test:development": "NODE_ENV=development playwright test",
+    "test:ui": "NODE_ENV=staging playwright test --ui",
+    "test:headed": "NODE_ENV=staging playwright test --headed",
+    "test:debug": "NODE_ENV=staging playwright test --debug",
+    "test:smoke": "NODE_ENV=staging playwright test --grep @smoke",
+    "test:admin": "NODE_ENV=staging playwright test --grep @admin",
+    "test:ci": "NODE_ENV=staging playwright test --reporter=html,junit,github",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen https://appv2.ezyscribe.com",
+    "playwright:install": "playwright install",
+    "env:setup": "cp .env.example .env.staging && echo 'Please edit .env.staging with your actual credentials'"
+  },
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
-    "@types/node": "^24.3.1",
-    "@types/winston": "^2.4.4"
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.9.1",
+    "@types/winston": "^2.4.4",
+    "dotenv": "^16.6.1",
+    "typescript": "^5.3.0"
   },
   "dependencies": {
-    "winston": "^3.17.0"
+    "winston": "^3.18.3"
   }
 }

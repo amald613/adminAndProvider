@@ -2,50 +2,46 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [main]
+    branches: [ main, develop ]
   pull_request:
-    branches: [main]
-  schedule:
-    - cron: "53 16 * * *"   # Runs every day at 10:23 pm
-  workflow_dispatch:        # 👈 enables "Run workflow" button in GitHub UI
+    branches: [ main, develop ]
+
+env:
+  NODE_ENV: staging
+  HEADLESS: true
 
 jobs:
   test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # ✅ allow pushing to gh-pages
+    
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Run Playwright tests
-        run: npx playwright test --reporter=html,github
-        continue-on-error: false   # ❌ fail workflow if tests fail
-
-      # ✅ Upload HTML report as artifact (downloadable)
-      - name: Upload Playwright HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
-      # 🌍 Deploy HTML report to GitHub Pages
-      - name: Deploy Playwright report to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: playwright-report
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+      
+    - name: Run Playwright tests
+      run: npx playwright test --reporter=html,github,junit
+      env:
+        BASE_URL: ${{ secrets.BASE_URL }}
+        ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30

@@ -9,17 +9,17 @@ export class LoginPage {
   readonly passwordError: Locator;
   readonly combinedError: Locator;
   readonly doctorDashboardText: Locator;
-  readonly scribeDashboardText: Locator;
+  // readonly scribeDashboardText: Locator;
   readonly forgotPassword: Locator;
   readonly forgotPasswordMessage: Locator;
-  readonly passwordEyeButton: Locator
+  readonly passwordEyeButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.getByRole('textbox', { name: 'Email' });
-    this.passwordInput = page.locator('input[name="password"]');
-    this.passwordEyeButton = page.locator('[id="«Riqhtrlb»-form-item"]').getByRole('button');
-    this.submitButton = page.getByRole('button', { name: 'Submit' });
+    this.emailInput = page.getByRole('textbox', { name: /email/i });
+    this.passwordInput = page.locator('input[type="password"]');
+    this.passwordEyeButton = this.passwordInput.locator('xpath=..').getByRole('button');
+    this.submitButton = page.getByRole('button', { name: /submit/i });
     // Field-specific error messages
     this.emailError = page.getByText('Invalid email format');
     this.passwordError = page.getByText('Password must be at least 8');
@@ -28,17 +28,17 @@ export class LoginPage {
     this.combinedError = page.getByText('Invalid email or password');
 
 
-    // this.doctorDashboardText = page.getByRole('button', { name: 'Record' });
-    this.doctorDashboardText = page.getByRole('heading', { name: 'Application error: a server-' });
+    this.doctorDashboardText = page.getByRole('button', { name: /Record/i });
 
-    this.forgotPassword = page.getByText('Forgot your password?');
-    this.forgotPasswordMessage = page.getByText('Check your email for the reset password link');
+    this.forgotPassword = page.getByRole('link', { name: /Forgot your password\?/i });
+    this.forgotPasswordMessage = page.getByText(/reset password link/i);
 
 
   }
 
   async goto() {
-    await this.page.goto("https://appv2.ezyscribe.com");
+    await this.page.goto("https://appv2.ezyscribe.com/login", { waitUntil: 'networkidle' });
+    await this.emailInput.waitFor({ state: 'visible', timeout: 15000 });
   }
 
   async enterEmail(email: string) {
@@ -46,6 +46,7 @@ export class LoginPage {
   }
 
   async enterPassword(password: string) {
+    await this.passwordInput.waitFor({ state: 'visible', timeout: 15000 });
     await this.passwordInput.fill(password);
   }
 

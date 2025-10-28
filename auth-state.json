@@ -1,0 +1,15 @@
+{
+  "cookies": [
+    {
+      "name": "__Secure-better-auth.session_token",
+      "value": "0IgfMzVJke5GUlF4gw9J8vUrxrcCPkoR.4Xu1es7j7LsCk0nKHibbwUiTLF%2FeuuXIHuysadkBPiM%3D",
+      "domain": "appv2.ezyscribe.com",
+      "path": "/",
+      "expires": 1761840599.104717,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

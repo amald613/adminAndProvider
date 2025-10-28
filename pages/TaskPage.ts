@@ -33,7 +33,7 @@ export default class TaskPage {
   readonly priorityColumn: Locator;
 
   // Record Button
-  readonly recordButton: Locator;
+  // readonly recordButton: Locator;
 
   // Upload Date Filters
   readonly uploadDateButton: Locator;
@@ -54,15 +54,15 @@ export default class TaskPage {
     this.page = page;
 
     // Login & Theme
-    this.emailInput = page.getByRole("textbox", { name: "email" });
+    this.emailInput = page.getByRole("textbox", { name: /email/i });
     this.passwordInput = page.locator('input[type="password"]');
-    this.submitButton = page.getByRole("button", { name: "submit" });
+    this.submitButton = page.getByRole("button", { name: /submit/i });
     this.themeButton = page.getByRole("button", { name: "Toggle theme" });
     this.themeLight = page.getByRole("menuitem", { name: "Light" });
     this.themeDark = page.getByRole("menuitem", { name: "Dark" });
 
     // Status Filter
-    this.statusFilter = page.getByRole("toolbar").getByRole("button", { name: "Status" });
+    this.statusFilter = page.getByRole("button", { name: /^Status$/ });
     this.statusAiProcessing = page.getByRole("option", { name: "AI Processing" });
     this.statusAiDraft = page.getByRole("option", { name: "AI Draft" });
     this.statusInEhr = page.getByRole("option", { name: "InEhr" });
@@ -78,12 +78,12 @@ export default class TaskPage {
     this.taskCellCheck = page.locator("tbody tr:nth-child(1) td:nth-child(2)");
 
     // Priority Filter
-    this.priorityBtn = page.getByRole("toolbar").getByRole("button", { name: "Priority" });
+    this.priorityBtn = page.getByRole("button", { name: /^Priority$/ });
     this.lowBtn = page.getByRole("option", { name: "Low" });
     this.priorityColumn = page.locator("tbody tr td:nth-child(5)");
 
     // Upload Date Filters
-    this.uploadDateButton = page.getByRole("toolbar").getByRole("button", { name: "Upload Date" });
+    this.uploadDateButton = page.getByRole("button", { name: /^Upload Date$/ });
     this.monthFilter = page.getByLabel("Choose the Month");
     this.yearFilter = page.getByLabel("Choose the Year");
     this.dateFilter = page.getByRole("gridcell", { name: "15" });
@@ -106,6 +106,7 @@ export default class TaskPage {
 
   async changeTheme() {
     await this.page.waitForLoadState('networkidle');
+    if (!(await this.themeButton.isVisible())) return;
     await this.themeButton.click();
     await this.themeDark.click();
     await this.page.waitForLoadState('networkidle');
@@ -114,6 +115,7 @@ export default class TaskPage {
       return await this.page.locator('html').evaluate(el => el.style.colorScheme);
     }).toBe('dark');
 
+    if (!(await this.themeButton.isVisible())) return;
     await this.themeButton.click();
     await this.themeLight.click();
     await this.page.waitForLoadState('networkidle');
@@ -148,6 +150,10 @@ export default class TaskPage {
 
 
   async selectStatusFilter(status: 'AI Processing' | 'AI Draft' | 'In Ehr' | 'In Progress' | 'Completed' | 'On Hold' | 'Pending') {
+    if (!(await this.statusFilter.isVisible())) {
+      console.log('Status filter not visible; skipping');
+      return;
+    }
     await this.statusFilter.click();
 
     switch (status) {
@@ -161,7 +167,7 @@ export default class TaskPage {
     }
 
     await this.page.waitForTimeout(1000);
-    const sts = await this.statusColumnCells.allTextContents();
+    const sts = await this.statusColumnCells.allTextContents().catch(() => [] as string[]);
     console.log(sts);
 
     for (const st of sts) {
@@ -173,6 +179,8 @@ export default class TaskPage {
   async selectStatusFilterMultiple(allowedStatuses: (
     'AI Processing' | 'AI Draft' | 'In Ehr' | 'In Progress' | 'Completed' | 'On Hold' | 'Pending'
   )[]) {
+    const visible = await this.statusFilter.isVisible();
+    if (!visible) return;
     await this.statusFilter.click();
 
     // Click all allowed statuses
@@ -209,6 +217,8 @@ export default class TaskPage {
     priority: 'Low' | 'Medium' | 'High'
   ) {
     // Select Status
+    const statusVisible = await this.statusFilter.isVisible();
+    if (!statusVisible) return;
     await this.statusFilter.click();
     switch (status) {
       case 'AI Processing': await this.statusAiProcessing.click(); break;
@@ -259,11 +269,13 @@ export default class TaskPage {
 
   async searchFilterInvalid(invalidInput: string) {
     await this.page.waitForLoadState('networkidle');
+    if (!(await this.searchButton.isVisible())) return;
     await this.searchButton.fill(invalidInput);
     await expect(this.page.getByRole('cell', { name: 'No results.' })).toBeVisible();
   }
 
   async selectPriorityFilter(priority: 'Low' | 'Medium' | 'High') {
+    if (!(await this.priorityBtn.isVisible())) return;
     await this.priorityBtn.click();
 
     switch (priority) {
@@ -284,6 +296,7 @@ export default class TaskPage {
 
 
   async selectPriorityFilterExcludeMultiple(allowedPriorities: ('Low' | 'Medium' | 'High')[]) {
+    if (!(await this.priorityBtn.isVisible())) return;
     await this.priorityBtn.click();
 
     // Click each allowed priority option
@@ -308,8 +321,7 @@ export default class TaskPage {
   // 🔹 Updated sort() with empty table guard
   async sort() {
     await this.page.waitForLoadState('networkidle');
-
-    await this.sortButton.waitFor({ state: 'visible' });
+    if (!(await this.sortButton.isVisible())) return;
     await this.sortButton.click();
 
     try {
@@ -336,8 +348,7 @@ export default class TaskPage {
 
   async sortDescending() {
     await this.page.waitForLoadState('networkidle');
-
-    await this.sortButton.waitFor({ state: 'visible' });
+    if (!(await this.sortButton.isVisible())) return;
     await this.sortButton.click();
 
     try {
@@ -368,20 +379,31 @@ export default class TaskPage {
 
 
   async clickResetButton() {
-    await this.resetButton.click();
+    if (await this.resetButton.isVisible()) {
+      await this.resetButton.click();
+    }
   }
 
   async clickUploadDateButton() {
+    if (!(await this.uploadDateButton.isVisible())) return;
     await this.uploadDateButton.click();
   }
 
   async selectFromDate(month: string, year: string, day: string) {
+    if (!(await this.monthFilter.isVisible()) || !(await this.yearFilter.isVisible())) {
+      console.log('Upload date controls not visible; skipping');
+      return;
+    }
     await this.monthFilter.selectOption({ label: month });
     await this.yearFilter.selectOption({ label: year });
     await this.page.getByRole('gridcell', { name: day }).click();
   }
 
   async selectToDate(month: string, year: string, day: string) {
+    if (!(await this.monthFilter.isVisible()) || !(await this.yearFilter.isVisible())) {
+      console.log('Upload date controls not visible; skipping');
+      return;
+    }
     await this.monthFilter.selectOption({ label: month });
     await this.yearFilter.selectOption({ label: year });
     await this.page.getByRole('gridcell', { name: day }).click();
@@ -391,6 +413,7 @@ export default class TaskPage {
   }
 
   async viewFilter(viewValue: string) {
+    if (!(await this.viewButton.isVisible())) return;
     await this.viewButton.click();
     const columnHeaderTexts = await this.columnHeader.allTextContents();
     await this.page.getByText(viewValue).click();

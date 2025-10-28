@@ -1,27 +1,14 @@
 import { test, expect } from "@playwright/test";
-import TaskPage from "../pages/TaskPage";   // adjust path based on your project
-import { logInfo, logError } from "../utils/logger"; // import logger
+import TaskPage from "../pages/TaskPage";
+import { logInfo } from "../utils/logger";
 
 test.describe("Task Dashboard Tests", () => {
   let taskPage: TaskPage;
 
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+  test.beforeEach(async ({ page }) => {
     taskPage = new TaskPage(page);
-
-    logInfo("Navigating to EzyScribe and logging in");
-    await page.goto("https://appv2.ezyscribe.com");
-    await taskPage.login("testprovider@gmail.com", "12345678");
-    try {
-      await expect(page).toHaveURL(/https:\/\/appv2\.ezyscribe\.com\/tasks/, { timeout: 50000 });
-    } catch (error) {
-      console.warn("URL check failed, waiting for theme toggle button instead...");
-      // Wait for the theme button to be visible
-      await taskPage.themeButton.waitFor({ state: 'visible', timeout: 10000 });
-    }
-
-    logInfo("Login successful, Task Dashboard loaded");
+    await page.goto("https://appv2.ezyscribe.com/tasks", { waitUntil: "networkidle" });
+    await taskPage.themeButton.waitFor({ state: 'visible', timeout: 15000 });
   });
 
   test("TP001 - Toggle Theme (Light <-> Dark)", async () => {
@@ -111,9 +98,6 @@ test.describe("Task Dashboard Tests", () => {
     await taskPage.verifyThemePersistence();
     logInfo("Theme persisted successfully after refresh");
   });
-
-
-
 
 
 });
