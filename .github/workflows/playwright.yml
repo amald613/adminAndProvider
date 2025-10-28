@@ -5,6 +5,8 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  schedule:
+    - cron: '30 17 * * *' # 11:00 PM IST (UTC+5:30)
 
 env:
   NODE_ENV: staging
@@ -29,8 +31,8 @@ jobs:
     - name: Install Playwright browsers
       run: npx playwright install --with-deps
       
-    - name: Run Playwright tests
-      run: npx playwright test --reporter=html,github,junit
+    - name: Run Playwright tests (4 workers)
+      run: npx playwright test --workers=4 --reporter=html,github,junit
       env:
         BASE_URL: ${{ secrets.BASE_URL }}
         ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
